@@ -74,6 +74,7 @@
 <br>
 
 ![Infrastructure Diagram](infra_edit.jpg)
+
 *(※ 인프라스트럭처 및 데이터 파이프라인 흐름도)*
 
 ---
