@@ -1,0 +1,44 @@
+# 1. 미들웨어: /longhorn 뒤에 /가 없으면 강제로 붙여주기 (Redirect)
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: longhorn-redirect
+  namespace: longhorn-system
+spec:
+  redirectRegex:
+    regex: "^(.*)/longhorn$"
+    replacement: "${1}/longhorn/"
+---
+# 2. 미들웨어: 서비스에게 줄 때는 /longhorn 떼기 (기존 기능)
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: longhorn-stripprefix
+  namespace: longhorn-system
+spec:
+  stripPrefix:
+    prefixes:
+      - /longhorn
+---
+# 3. 인그레스: 두 미들웨어를 순서대로 장착
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: longhorn-ingress
+  namespace: longhorn-system
+  annotations:
+    # 리다이렉트를 먼저 하고, 그 다음 경로를 뗍니다. (순서 중요)
+    traefik.ingress.kubernetes.io/router.middlewares: |
+      longhorn-system-longhorn-redirect@kubernetescrd,
+      longhorn-system-longhorn-stripprefix@kubernetescrd
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /longhorn
+        pathType: Prefix
+        backend:
+          service:
+            name: longhorn-frontend
+            port:
+              number: 80
