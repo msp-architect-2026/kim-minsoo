@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-server
+  namespace: argocd
+  annotations:
+    # MetalLB에게 특정 IP를 예약해서 할당해달라고 요청하는 옵션 (선택 사항)
+    metallb.universe.tf/address-pool: first-pool 
+spec:
+  type: LoadBalancer    # ClusterIP에서 LoadBalancer로 변경
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080    # 내부 파드 포트
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8081    # 내부 파드 포트
+  selector:
+    app.kubernetes.io/name: argocd-server
