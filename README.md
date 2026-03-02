@@ -2,7 +2,7 @@
 ### Smart Factory 3-Node HA Edge Orchestration & Data Preservation System
 
 <div align="center">
-  <img src="https://img.shields.io/badge/Status-Day%281%20In%20Progress-orange" alt="Status" />
+  <img src="https://img.shields.io/badge/Status-Day%208%20In%20Progress-orange" alt="Status" />
   <img src="https://img.shields.io/badge/OS-Raspberry%20Pi%20Lite-C51A4A?logo=raspberrypi&logoColor=white" alt="Raspberry Pi OS" />
   <img src="https://img.shields.io/badge/Kubernetes-K3s-FFC61C?logo=kubernetes&logoColor=white" alt="K3s" />
   <img src="https://img.shields.io/badge/Storage-Longhorn-00A6D6?logo=icloud&logoColor=white" alt="Longhorn" />
