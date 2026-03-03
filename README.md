@@ -100,9 +100,9 @@
 | :--- | :--- |
 | 🏠 Wiki 전체 문서 | [Wiki 이동](https://github.com/msp-architect-2026/kim-minsoo/wiki/Home) |
 | 🎯 프로젝트 개요 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Project%E2%80%90Overview) |
-| 🧱 기술 스택 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Tech-Stack) |
+| 🧱 기술 스택 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/tech%E2%80%90stack) |
 | 🏛️ 기술 선택 근거 (ADR) | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Architecture-Decision-Record) |
-| 🛡️ 재해 복구 & 가용성 정책 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Disaster-Recovery-%26-Availability-Policy) |
-| 📊 용량 계획 & 하드웨어 스펙 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Capacity-Planning-%26-Hardware-Specs) |
-| 🔨 트러블슈팅 로그 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Troubleshooting-%26-Operations-Log) |
+| 🛡️ 재해 복구 & 가용성 정책 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Disaster-Recovery-&-Availability-Policy) |
+| 📊 용량 계획 & 하드웨어 스펙 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Capacity-Planning-&-Hardware-Specs) |
+| 🔨 트러블슈팅 로그 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Troubleshooting-&-Operations-Log) |
 
