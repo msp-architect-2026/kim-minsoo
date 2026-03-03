@@ -92,15 +92,17 @@
 
 ---
 
-## 📚 6. Documents & Wiki (작성 예정)
+## 📚 6. Documents & Wiki
 
-상세한 설계 근거, 아키텍처 문서, 그리고 운영 중 발생한 트러블슈팅 로깅은 별도 문서(Wiki)로 관리합니다.
+상세한 설계/운영 문서는 **[GitHub Wiki](https://github.com/msp-architect-2026/kim-minsoo/wiki/Home)** 에서 관리합니다.
 
-* **[Architecture Decision Record (ADR)]** - K3s, Longhorn, Lite OS 등 핵심 기술 스택 도입 근거
-* **[Disaster Recovery Policy]** - Hot/Cold Data 계층화 보존 전략 및 가용성 보장 정책서
-* **[Chaos Engineering Test]** - 위험 구역(W2) 노드 물리적 파괴 시뮬레이션 및 복구 검증 시나리오
-* **[Capacity Planning]** - 하드웨어 리소스 스펙 산정 근거
-* **[Troubleshooting Log]** - 라즈베리파이 전력 부족(USB Cut-off), SSD 절전 모드 등 인프라 이슈 해결 기록
+| 문서 | 바로가기 |
+| :--- | :--- |
+| 🏠 Wiki 전체 문서 | [Wiki 이동](https://github.com/msp-architect-2026/kim-minsoo/wiki/Home) |
+| 🎯 프로젝트 개요 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Project%E2%80%90Overview) |
+| 🧱 기술 스택 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Tech-Stack) |
+| 🏛️ 기술 선택 근거 (ADR) | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Architecture-Decision-Record) |
+| 🛡️ 재해 복구 & 가용성 정책 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Disaster-Recovery-%26-Availability-Policy) |
+| 📊 용량 계획 & 하드웨어 스펙 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Capacity-Planning-%26-Hardware-Specs) |
+| 🔨 트러블슈팅 로그 | [바로가기](https://github.com/msp-architect-2026/kim-minsoo/wiki/Troubleshooting-%26-Operations-Log) |
 
----
-> 💡 *본 문서는 프로젝트 진행 단계에 따라 지속적으로 업데이트됩니다.*
