@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: safe-edge-integrated-ai
+  namespace: ai-apps 
+  labels:
+    app: safe-edge-integrated-ai
+spec:
+  replicas: 1 
+  
+  # 🚨 [신규 추가 0] 파드 업데이트 시 카메라 장치 충돌(Lock) 에러를 막기 위한 필수 옵션
+  strategy:
+    type: Recreate
+    
+  selector:
+    matchLabels:
+      app: safe-edge-integrated-ai
+  template:
+    metadata:
+      labels:
+        app: safe-edge-integrated-ai
+    spec:
+      # 🚨 [삭제] 기존의 깐깐한 nodeSelector는 지우거나 주석 처리합니다.
+      # nodeSelector:
+      #   kubernetes.io/hostname: worker2 
+      
+      # 🚨 [신규 추가 1] worker2를 1순위로 선호하지만, 죽으면 다른 노드로 유연하게 대피하는 설정
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - worker2
+                
+      # 🚨 [신규 추가 2] 노드 장애 시 5분 대기하지 않고 30초 만에 즉시 대피(Failover)
+      tolerations:
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 30
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 30
+        
+      containers:
+      - name: ai-processor
+        image: minsoo0919/safe-edge-ai:v6
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true 
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1" 
+        volumeMounts:
+        - name: dev-dir
+          mountPath: /dev
+        - name: udev-dir
+          mountPath: /run/udev 
+      volumes:
+      - name: dev-dir
+        hostPath:
+          path: /dev
+      - name: udev-dir
+        hostPath:
+          path: /run/udev
