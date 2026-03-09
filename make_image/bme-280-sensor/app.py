@@ -55,6 +55,7 @@ try:
                     "pressure": round(press, 2)
                 }
             }
+            
         ]
         client.write_points(json_body)
         
