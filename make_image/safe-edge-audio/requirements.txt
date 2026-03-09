@@ -1,0 +1,7 @@
+tensorflow
+tensorflow-hub
+numpy
+pyaudio
+scipy
+influxdb
+setuptools<70.0.0
