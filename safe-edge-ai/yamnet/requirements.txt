@@ -1,5 +1,0 @@
-tensorflow
-tensorflow-hub
-numpy
-pyaudio
-scipy
