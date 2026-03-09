@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bme280-sensor
+  namespace: monitoring  # 네임스페이스가 monitoring 입니다!
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bme280-sensor
+  template:
+    metadata:
+      labels:
+        app: bme280-sensor
+    spec:
+      # 🚨 [삭제] 기존의 고정 할당 방식은 지워줍니다.
+      # nodeSelector:
+      #   kubernetes.io/hostname: worker2 
+      
+      # 🚨 [신규 추가 1] worker2를 최우선으로 선호 (Failback을 위한 이정표)
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - worker2
+                
+      # 🚨 [신규 추가 2] 랜선 뽑히면 30초 만에 worker1로 대피 (초고속 Failover)
+      tolerations:
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 30
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 30
+
+      containers:
+      - name: bme280
+        image: minsoo0919/bme280-sensor:v2
+        securityContext:
+          privileged: true 
+        volumeMounts:
+        - mountPath: /dev/i2c-1
+          name: i2c-dev
+      volumes:
+      - name: i2c-dev
+        hostPath:
+          path: /dev/i2c-1
