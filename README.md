@@ -52,7 +52,7 @@
 
 ### 2. High-Availability Edge Orchestration (고가용성 엣지 오케스트레이션)
 - **Control Plane 격리:** 리소스가 부족한 엣지 환경(Pi 5 4GB)에서도 `Taint` 설정을 통해 마스터 노드의 부하를 원천 차단하여 클러스터 안정성 확보.
-- **초고속 Failover:** 파드 스케줄링 전략(Node Affinity + Toleration 30초) 최적화를 통해 물리적 파괴 상황에서도 **1분 이내(Target RTO)** 에 무중단 감시 체계 자동 승계.
+- **초고속 Failover:** 파드 스케줄링 전략(Node Affinity + Toleration 30초) 최적화를 통해 물리적 파괴 상황에서도 **2분 이내(Target RTO)** 에 무중단 감시 체계 자동 승계.
 
 ### 3. Cost-Effective DR System (저비용 고효율 DR 시스템)
 - **오픈 소스 및 경량 H/W 기반:** 범용 SBC(라즈베리파이)와 `K3s`, `ArgoCD` 등 오픈 소스 기술 스택을 결합하여 고가의 산업용 서버 대비 **90% 이상의 도입 비용 절감**.
@@ -105,7 +105,7 @@
 | **OS 환경** | GUI 완전 배제 (Raspberry Pi OS Lite 64-bit) | 4GB/8GB 엣지 환경에서 K3s 및 AI 컨테이너 가용 메모리 극대화 |
 | **Control Plane** | Master Node `Taint` 설정 (연산 완전 격리) | OOM 방지 및 클러스터 생존성 확보 |
 | **Storage** | SD카드 쓰기 배제, SSD + Longhorn 구성 | 단일 물리 매체 파괴 시 SPOF 방지 및 I/O 병목 해소 |
-| **DR / 가용성** | RPO 0초 (미러링), RTO 1분 이내 (승계) | Danger Zone 파괴 시에도 Buffer Zone에 직전 데이터 100% 보존 |
+| **DR / 가용성** | RPO 0초 (미러링), RTO 2분 이내 (승계) | Danger Zone 파괴 시에도 Buffer Zone에 직전 데이터 100% 보존 |
 | **네트워크** | 이더넷(클러스터 전용) / Wi-Fi(인터넷) 물리 분리 | 사내망 DHCP 충돌 원천 차단 |
 
 > 📚 상세 DR 정책 → [Wiki: Disaster Recovery & Availability Policy](https://github.com/msp-architect-2026/kim-minsoo/wiki/Disaster-Recovery-&-Availability-Policy)
@@ -157,80 +157,7 @@ InfluxDB Hot Data (최근 5시간 보존)
 
 ---
 
-## 🔥 8. Key Troubleshooting (핵심 트러블슈팅)
-
-실제 구현 과정에서 겪은 수십 개의 이슈 중 아키텍처 설계에 직접적인 영향을 준 3가지를 소개합니다.
-
----
-
-### 🔴 Issue 1. 사내망 DHCP 충돌 및 MetalLB/Klipper 이중 설치
-`2026.02.25` `Network` `LoadBalancer`
-
-**증상:** MetalLB 설치 후 `controller` 파드가 `CrashLoopBackOff`, 노드 간 ping이 `137ms → 959ms`로 주기적으로 폭주.
-
-**원인:** 두 가지 복합 원인이었습니다.
-- 사내망 DHCP가 노드 고정 IP(`192.168.0.x`)와 동일 대역에서 충돌 → **ARP Storm 발생**
-- K3s 기본 내장 Klipper ServiceLB가 활성화된 상태에서 MetalLB를 추가 설치 → **로드밸런서 권한 충돌**
-
-**해결:** 클러스터 전용 독립망(`10.10.10.x/24`)으로 대역 자체를 분리하고, K3s 재설치 시 `--disable servicelb` 옵션으로 Klipper를 원천 차단.
-
-```bash
-curl -sfL https://get.k3s.io | sh -s - \
-  --node-ip 10.10.10.10 \
-  --flannel-iface eth0 \
-  --disable servicelb
-```
-
-**교훈:** 베어메탈 클러스터는 설치 전에 네트워크 대역, DHCP 충돌 여부, LB 선택을 먼저 확정해야 한다.
-
-> 📚 상세 분석 → [Wiki: Troubleshooting Log](https://github.com/msp-architect-2026/kim-minsoo/wiki/Troubleshooting-&-Operations-Log)
-
----
-
-### 🟡 Issue 2. Longhorn 3-Node HA 구성 중 Master 노드 `Ready=False`
-`2026.02.26` `Storage` `Longhorn`
-
-**증상:** Master 노드에 Longhorn `Taint Toleration`을 부여했으나 `manager` 파드만 누락되며 `Ready: False` 고착.
-
-**원인:** 전역 Toleration 패치로 CSI, engine-image 등 하위 파드들은 Master에 진입했지만, **정작 이들을 관리해야 할 `longhorn-manager` DaemonSet 자체에 Toleration이 누락**되는 '닭과 알의 문제' 발생.
-
-**해결:** `longhorn-manager` DaemonSet에 직접 Toleration을 패치. 실행 후 **6초 만에** 3-Node HA 완성.
-
-```bash
-kubectl patch ds longhorn-manager -n longhorn-system \
-  -p '{"spec":{"template":{"spec":{"tolerations":[
-    {"key":"node-role.kubernetes.io/master",
-     "operator":"Equal","value":"true","effect":"NoSchedule"}
-  ]}}}}'
-```
-
-**교훈:** 꼬인 리소스는 억지로 살리기보다 Clean Reinstall 후 정확한 타겟에 CLI 패치가 가장 빠르다.
-
-> 📚 상세 분석 → [Wiki: Troubleshooting Log](https://github.com/msp-architect-2026/kim-minsoo/wiki/Troubleshooting-&-Operations-Log)
-
----
-
-### 🔵 Issue 3. K3s CronJob `context deadline exceeded` 및 CPU 1291% 폭주
-`2026.03.05` `CronJob` `NFS` `Data Tiering`
-
-**증상:** 데이터 티어링용 CronJob 배포 직후 파드가 `CreateContainerError`로 무한 실패, Master 노드 CPU Load가 **1291%** 까지 폭주.
-
-**원인:** CronJob 볼륨이 WinNFSd 마운트 경로(`hostPath`)를 사용하는 구조였는데, containerd가 컨테이너 생성 시 NFS 마운트 타임아웃(`context deadline exceeded`) 발생 → containerd 내부 DB에 **유령 이름 예약 레코드** 생성 → 재시도 시 이름 충돌 무한 반복.
-
-**해결:** K3s CronJob을 포기하고 아키텍처 자체를 전환. 리눅스 crontab에서 Python 스크립트를 직접 실행하는 방식으로 컨테이너 생성 오버헤드를 제거.
-
-```
-[기존] K3s CronJob → 매번 컨테이너 생성 → NFS 마운트 타임아웃
-[변경] 리눅스 crontab → Host에서 Python 직접 실행 → 컨테이너 생성 없음
-```
-
-**교훈:** 클라우드 네이티브 정석(CronJob)이 리소스 제한적인 엣지 환경에서는 독이 될 수 있다. 환경의 제약을 먼저 고려해야 한다.
-
-> 📚 상세 분석 → [Wiki: Troubleshooting Log](https://github.com/msp-architect-2026/kim-minsoo/wiki/Troubleshooting-&-Operations-Log)
-
----
-
-## 📚 9. Documents & Wiki
+## 📚 8. Documents & Wiki
 
 상세한 설계/운영 문서는 **[GitHub Wiki](https://github.com/msp-architect-2026/kim-minsoo/wiki/Home)** 에서 관리합니다.
 
@@ -246,20 +173,3 @@ kubectl patch ds longhorn-manager -n longhorn-system \
 
 ---
 
-## 💡 10. What I Learned (배운 점)
-
-이 프로젝트를 통해 단순히 기술을 사용하는 것을 넘어 **"왜 이렇게 설계해야 하는가"** 를 몸으로 익혔습니다.
-
-- **베어메탈은 클라우드가 당연하게 해주던 것을 직접 해야 한다.** LoadBalancer IP 할당, 네트워크 대역 설계, 스토리지 복제 설정까지 모든 레이어를 직접 다루면서 클라우드가 추상화해주던 복잡성을 실감했습니다.
-
-- **엣지 환경에서 클라우드 네이티브 정석은 독이 될 수 있다.** CronJob → crontab 전환처럼, 교과서적 방법이 제한적인 리소스 환경에서는 오히려 장애를 만든다는 것을 직접 겪었습니다.
-
-- **트러블슈팅은 증상이 아닌 근본 원인을 향해야 한다.** `failed to reserve container name`이라는 에러만 봤다면 영원히 해결 못했을 겁니다. 그 이전에 왜 `context deadline exceeded`가 발생했는지를 거슬러 올라가는 습관이 핵심이었습니다.
-
-- **설계 원칙을 타협하지 않는 것이 결국 빠른 길이다.** Longhorn 2-Node로 타협할 뻔했지만 3-Node를 포기하지 않고 끝까지 파고든 결과, DaemonSet 꼬임이라는 진짜 원인을 발견할 수 있었습니다.
-
----
-
-<div align="center">
-  <sub>Built with 🔥 on Raspberry Pi 5 | Completed 2026.03.12</sub>
-</div>
