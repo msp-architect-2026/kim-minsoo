@@ -67,15 +67,17 @@
 
 | 분류 | 기술 | 선택 이유 |
 |:---|:---|:---|
-| **Container Orchestration** | K3s (latest) | ARM64 엣지 환경에 최적화된 경량 쿠버네티스 |
-| **Distributed Storage** | Longhorn | 동기식 복제로 RPO 0초 달성, 노드 파괴 시 데이터 보존 |
-| **GitOps** | ArgoCD + GitLab + Helm | 선언적 배포로 인프라 상태를 Git이 단일 진실 원천(SSOT)으로 관리. Helm Chart로 ai-apps 배포 설정을 values.yaml 하나로 통합 관리 |
-| **Time-Series DB** | InfluxDB 1.8 (arm64v8) | AI/센서 감지 데이터의 시계열 저장 및 Grafana 연동 |
-| **Monitoring** | Prometheus + Grafana | 전 노드 메트릭 수집 및 3단계 Slack 알람 |
-| **AI Inference** | YOLO + YAMNet | 화재/자세 감지(영상) + 이상 소음 감지(오디오) |
-| **Load Balancer** | MetalLB + Traefik | 베어메탈 환경의 외부 IP 할당 및 Ingress 라우팅 |
-| **IaC** | Ansible | 전 노드 설정 자동화 (네트워크, NFS, 티어링, 헬스체크) |
-| **OS** | Raspberry Pi OS Lite 64-bit | GUI 배제로 K3s 및 AI 컨테이너 가용 메모리 극대화 |
+| **OS & Computing** | Raspberry Pi OS Lite 64-bit | GUI(그래픽 스택)를 완전 배제하여 부팅 오버헤드를 없애고, Master 노드(4GB)의 K3s 및 AI 컨테이너 가용 메모리를 극대화 |
+| **Container Orchestration** | K3s (latest) | ARM64 엣지 환경에 최적화된 경량 쿠버네티스. 단일 바이너리로 구동되어 OOM을 방지하며, `tolerationSeconds` 튜닝을 통해 30초 내 Failover 달성 |
+| **Distributed Storage** | 외장 SSD + Longhorn (3-Node) | 동기식 미러링으로 RPO 0초 달성. Danger Zone(W2) 파괴 시에도 Safe/Buffer Zone 양쪽에 데이터를 보존하는 이중 안전망 구축 |
+| **Network & Ingress** | MetalLB + Traefik | 폐쇄망 베어메탈 환경에서 클라우드 LB 없이 L2 기반 VIP(가상 IP) 할당. K3s 내장 Traefik을 그대로 활용해 리소스 낭비 최소화 |
+| **GitOps** | ArgoCD + GitLab + Helm | 선언적 배포로 인프라 상태를 Git이 단일 진실 원천(SSOT)으로 관리. Helm Chart를 도입해 복잡한 배포 설정을 `values.yaml` 하나로 통합 제어 |
+| **Time-Series DB** | InfluxDB 1.8 (arm64v8) | AI 이진 감지값(0/1) 및 센서 시계열 데이터 저장. RDBMS 대비 압도적인 쓰기 성능을 제공하며 라즈베리파이 공식 아키텍처 지원 |
+| **Monitoring & Alert** | Prometheus + Grafana | 클러스터 메트릭 및 센서 데이터 통합 시각화. Alert Rules를 활용해 장애 발생→Failover→복구 전 과정을 추적하는 무인 3단계 Slack 알람 구현 |
+| **AI Inference** | YOLOv8 + YAMNet | 시각(화재/자세)과 청각(이상 소음)을 결합한 멀티모달 구조. 현장 노이즈나 단순 데시벨 임계치의 한계를 극복하고 오탐율(False Positive) 최소화 |
+| **IaC (운영 자동화)** | Ansible | 3대의 라즈베리파이 노드 설정(고정 IP, NFS 마운트, 티어링 스크립트, 헬스체크)을 수동 개입 없이 멱등성을 보장하며 일괄 자동화 |
+| **Data Tiering** | 리눅스 crontab | K3s CronJob의 NFS 타임아웃 및 CrashLoopBackOff 이슈를 해결. OS 레벨에서 `NFS_CONNECTED`를 확인하는 Store-and-Forward 방식 구현 |
+| **Security** | 물리적 망분리 + IP 접근 통제 | L2 사설망(`10.10.10.x`)으로 외부 인터넷 노출 원천 차단. SSH 및 관리 도구 접근을 허가된 Host PC(`10.10.10.100`)로만 엄격히 제한 |
 
 > 📚 기술 선택 상세 근거 → [Architecture Decision Record (ADR)](https://github.com/msp-architect-2026/kim-minsoo/wiki/Architecture-Decision-Record)
 
