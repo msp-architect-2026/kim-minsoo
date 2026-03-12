@@ -69,7 +69,7 @@
 |:---|:---|:---|
 | **Container Orchestration** | K3s (latest) | ARM64 엣지 환경에 최적화된 경량 쿠버네티스 |
 | **Distributed Storage** | Longhorn | 동기식 복제로 RPO 0초 달성, 노드 파괴 시 데이터 보존 |
-| **GitOps** | ArgoCD + GitLab | 선언적 배포로 인프라 상태를 Git이 단일 진실 원천(SSOT)으로 관리 |
+| **GitOps** | ArgoCD + GitLab + Helm | 선언적 배포로 인프라 상태를 Git이 단일 진실 원천(SSOT)으로 관리. Helm Chart로 ai-apps 배포 설정을 values.yaml 하나로 통합 관리 |
 | **Time-Series DB** | InfluxDB 1.8 (arm64v8) | AI/센서 감지 데이터의 시계열 저장 및 Grafana 연동 |
 | **Monitoring** | Prometheus + Grafana | 전 노드 메트릭 수집 및 3단계 Slack 알람 |
 | **AI Inference** | YOLO + YAMNet | 화재/자세 감지(영상) + 이상 소음 감지(오디오) |
@@ -157,7 +157,7 @@ InfluxDB Hot Data (최근 5시간 보존)
 | **Phase 2** | Cluster & Storage | Longhorn 3-Node HA 구성 (RPO 0초), ArgoCD GitOps 파이프라인 | ✅ 완료 |
 | **Phase 3** | Edge AI & H/W | YOLO/YAMNet/BME280 컨테이너 배포, InfluxDB + Grafana 시각화 | ✅ 완료 |
 | **Phase 4** | DevOps & GitOps | GitLab 연동, ArgoCD Auto Sync, Prometheus 알람, Slack Webhook | ✅ 완료 |
-| **Phase 5** | IaC & Tiering | Ansible 5개 Playbook, Hot→Cold 데이터 티어링, Failover/Failback 자동화 | ✅ 완료 |
+| **Phase 5** | IaC & Tiering | Ansible 5개 Playbook, Helm Chart 기반 GitOps 배포, Hot→Cold 데이터 티어링, Failover/Failback 자동화 | ✅ 완료 |
 
 ---
 
