@@ -30,6 +30,8 @@
 
 > 상세한 설계/운영 문서는 **[GitHub Wiki](https://github.com/msp-architect-2026/kim-minsoo/wiki/Home)** 에서 관리합니다.
 
+> 설계 및 개발 과정의 이슈는 **[GitHub Project](https://github.com/orgs/msp-architect-2026/projects/16/views/1)** 에서 관리합니다.
+
 ---
 
 ## 📖 1. Project Overview (프로젝트 개요)
