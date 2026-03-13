@@ -87,7 +87,7 @@
 
 시스템은 물리적으로 **Safe Zone, Buffer Zone, Danger Zone**의 3계층으로 구성되며, 각 노드는 Layer 2 Switch로 연결됩니다.
 
-![Hardware Architecture](hardware_edit.jpg)
+![Hardware Architecture](hardware.jpg)
 
 | Role | Hostname (IP) | Zone | Mission & Specs |
 |:---|:---|:---|:---|
